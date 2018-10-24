@@ -197,19 +197,31 @@ public extension AttributedString {
         get {
             return substring(with: range)
         }
-        set {
+        mutating set {
             replaceCharacters(in: range, with: newValue)
         }
     }
     
-    subscript<R>(range: R)-> AttributedString where R: RangeExpression, R.Bound == Int {
+    func substring<R>(with range: R) -> AttributedString where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let fullRange = R.Bound(0)..<R.Bound(length)
+        let relativeRange = range.relative(to: fullRange)
+        let nsRange = NSRange(relativeRange)
+        return substring(with: nsRange)
+    }
+    
+    mutating func replaceCharacters<R>(in range: R, with attributedString: AttributedString) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let fullRange = R.Bound(0)..<R.Bound(length)
+        let relativeRange = range.relative(to: fullRange)
+        let nsRange = NSRange(relativeRange)
+        replaceCharacters(in: nsRange, with: attributedString)
+    }
+    
+    subscript<R>(range: R)-> AttributedString where R: RangeExpression, R.Bound: FixedWidthInteger {
         get {
-            let r = NSRange(range)
-            return self[r]
+            return substring(with: range)
         }
-        set {
-            let r = NSRange(range)
-            self[r] = newValue
+        mutating set {
+            replaceCharacters(in: range, with: newValue)
         }
     }
     
