@@ -70,13 +70,13 @@ public struct AttributedString {
 
 // MARK: -
     
-extension AttributedString {
+public extension AttributedString {
     
-    public var string: String {
+    var string: String {
         return _backing.immutableValue.string
     }
     
-    public var length: Int {
+    var length: Int {
         return _backing.immutableValue.length
     }
     
@@ -84,23 +84,34 @@ extension AttributedString {
         return NSRange(location: 0, length: length)
     }
     
-    public func substring(with range: NSRange) -> AttributedString {
+    private func nsRange<R>(from range: R) -> NSRange where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let fullRange = R.Bound(0)..<R.Bound(length)
+        let r = range.relative(to: fullRange)
+        return NSRange(r)
+    }
+    
+    func substring(with range: NSRange) -> AttributedString {
         let attrString = _backing.immutableValue.attributedSubstring(from: range)
         return AttributedString(attrString)
     }
     
-    public func attributes(at index: Int) -> [Keys : Any] {
+    func substring<R>(with range: R) -> AttributedString where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        return substring(with: r)
+    }
+    
+    func attributes(at index: Int) -> [Keys: Any] {
         let attr = _backing.immutableValue.attributes(at: index, effectiveRange: nil)
         return attr.asSwift
     }
     
-    public func attributes(at index: Int, in range: NSRange? = nil) -> ([Keys: Any], longestEffectiveRange: NSRange) {
+    func attributes(at index: Int, in range: NSRange? = nil) -> ([Keys: Any], longestEffectiveRange: NSRange) {
         var longestEffectiveRange = NSRange(location: 0, length: 0)
         let attr = _backing.immutableValue.attributes(at: index, longestEffectiveRange: &longestEffectiveRange, in: range ?? fullRange)
         return (attr.asSwift, longestEffectiveRange)
     }
     
-    public func attribute<T>(name: Key<T>, at index: Int) -> T? {
+    func attribute<T>(name: Key<T>, at index: Int) -> T? {
         guard let attr = _backing.immutableValue.attribute(name.asFoundation, at: index, effectiveRange: nil),
             let typedAttr = attr as? T else {
             return nil
@@ -108,7 +119,7 @@ extension AttributedString {
         return typedAttr
     }
     
-    public func attribute<T>(name: Key<T>, at index: Int, in range: NSRange? = nil) -> (T, longestEffectiveRange: NSRange)? {
+    func attribute<T>(name: Key<T>, at index: Int, in range: NSRange? = nil) -> (T, longestEffectiveRange: NSRange)? {
         var longestEffectiveRange = NSRange(location: 0, length: 0)
         guard let attr = _backing.immutableValue.attribute(name.asFoundation, at: index, longestEffectiveRange: &longestEffectiveRange, in: range ?? fullRange),
             let typedAttr = attr as? T else {
@@ -134,39 +145,73 @@ extension AttributedString {
         }
     }
     
-    public mutating func set(attributes: [Keys: Any], in range: NSRange? = nil) {
+    mutating func set(attributes: [Keys: Any], in range: NSRange? = nil) {
         _backing.uniqueMutableValue().setAttributes(attributes.asFoundation, range: range ?? fullRange)
     }
     
-    public mutating func add<T>(attribute: Key<T>, value: T, in range: NSRange? = nil) {
+    mutating func set<R>(attributes: [Keys: Any], in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        set(attributes: attributes, in: r)
+    }
+    
+    mutating func add<T>(attribute: Key<T>, value: T, in range: NSRange? = nil) {
         _backing.uniqueMutableValue().addAttribute(attribute.asFoundation, value: value, range: range ?? fullRange)
     }
     
-    public mutating func add(attributes: [Keys: Any], in range: NSRange? = nil) {
+    mutating func add<T, R>(attribute: Key<T>, value: T, in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        add(attribute: attribute, value: value, in: r)
+    }
+    
+    mutating func add(attributes: [Keys: Any], in range: NSRange? = nil) {
         _backing.uniqueMutableValue().addAttributes(attributes.asFoundation, range: range ?? fullRange)
     }
     
-    public mutating func remove(attribute: Keys, in range: NSRange? = nil) {
+    mutating func add<R>(attributes: [Keys: Any], in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        self.add(attributes: attributes, in: r)
+    }
+    
+    mutating func remove(attribute: Keys, in range: NSRange? = nil) {
         _backing.uniqueMutableValue().removeAttribute(attribute.asFoundation, range: range ?? fullRange)
     }
     
-    public mutating func append(_ attributedString: AttributedString) {
+    mutating func remove<R>(attribute: Keys, in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        remove(attribute: attribute, in: r)
+    }
+    
+    mutating func append(_ attributedString: AttributedString) {
         _backing.uniqueMutableValue().append(attributedString._backing.immutableValue)
     }
     
-    public mutating func insert(_ attributedString: AttributedString, at index: Int) {
+    mutating func insert(_ attributedString: AttributedString, at index: Int) {
         _backing.uniqueMutableValue().insert(attributedString._backing.immutableValue, at: index)
     }
     
-    public mutating func replaceCharacters(in range: NSRange, with attributedString: AttributedString) {
+    mutating func replaceCharacters(in range: NSRange, with attributedString: AttributedString) {
         _backing.uniqueMutableValue().replaceCharacters(in: range, with: attributedString._backing.immutableValue)
     }
     
-}
-
-// MARK: -
-
-public extension AttributedString {
+    mutating func replaceCharacters<R>(in range: R, with attributedString: AttributedString) where R: RangeExpression, R.Bound: FixedWidthInteger {
+        let r = nsRange(from: range)
+        replaceCharacters(in: r, with: attributedString)
+    }
+    
+    mutating func beginEditing() {
+        _backing.uniqueMutableValue().beginEditing()
+    }
+    
+    mutating func endEditing() {
+        _backing.uniqueMutableValue().endEditing()
+    }
+    
+    mutating func with(_ block: (inout AttributedString) -> Void) -> AttributedString {
+        self.beginEditing()
+        block(&self)
+        self.endEditing()
+        return self
+    }
     
     subscript<T>(attrName: Key<T>, in range: NSRange) -> T? {
         get {
@@ -181,6 +226,17 @@ public extension AttributedString {
                 return
             }
             add(attribute: attrName, value: val, in: range)
+        }
+    }
+    
+    subscript<T, R>(attrName: Key<T>, in range: R) -> T? where R: RangeExpression, R.Bound: FixedWidthInteger {
+        get {
+            let r = nsRange(from: range)
+            return self[attrName, in: r]
+        }
+        mutating set {
+            let r = nsRange(from: range)
+            self[attrName, in: r] = newValue
         }
     }
     
@@ -200,20 +256,6 @@ public extension AttributedString {
         mutating set {
             replaceCharacters(in: range, with: newValue)
         }
-    }
-    
-    func substring<R>(with range: R) -> AttributedString where R: RangeExpression, R.Bound: FixedWidthInteger {
-        let fullRange = R.Bound(0)..<R.Bound(length)
-        let relativeRange = range.relative(to: fullRange)
-        let nsRange = NSRange(relativeRange)
-        return substring(with: nsRange)
-    }
-    
-    mutating func replaceCharacters<R>(in range: R, with attributedString: AttributedString) where R: RangeExpression, R.Bound: FixedWidthInteger {
-        let fullRange = R.Bound(0)..<R.Bound(length)
-        let relativeRange = range.relative(to: fullRange)
-        let nsRange = NSRange(relativeRange)
-        replaceCharacters(in: nsRange, with: attributedString)
     }
     
     subscript<R>(range: R)-> AttributedString where R: RangeExpression, R.Bound: FixedWidthInteger {
