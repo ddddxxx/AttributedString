@@ -293,6 +293,6 @@ extension AttributedString: ExpressibleByStringLiteral {
 extension AttributedString: CustomPlaygroundDisplayConvertible {
     
     public var playgroundDescription: Any {
-        return _backing.immutableValue
+        return _backing.immutableValue.copy()
     }
 }
