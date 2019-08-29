@@ -1,10 +1,3 @@
-//
-//  Utilities.swift
-//  AttributedString
-//
-//  Created by ddddxxx on 2018/10/17.
-//
-
 import Foundation
 
 #if canImport(Cocoa)
@@ -38,10 +31,10 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
 
 extension Dictionary where Key == AttributedString.Keys, Value == Any {
     
-    var asFoundation: [NSAttributedString.Key: Any] {
+    var asNS: [NSAttributedString.Key: Any] {
         var result = Dictionary<NSAttributedString.Key, Any>(minimumCapacity: count)
         for (key, value) in self {
-            result[key.asFoundation] = value
+            result[key.asNS] = value
         }
         return result
     }
@@ -56,7 +49,7 @@ extension NSAttributedString.Key {
 
 extension AttributedString.Keys {
     
-    var asFoundation: NSAttributedString.Key {
+    var asNS: NSAttributedString.Key {
         return NSAttributedString.Key(rawValue)
     }
 }

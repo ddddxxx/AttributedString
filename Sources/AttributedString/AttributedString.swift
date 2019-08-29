@@ -1,11 +1,5 @@
-//
-//  AttributedString.swift
-//  AttributedString
-//
-//  Created by ddddxxx on 2018/10/17.
-//
-
 import Foundation
+
 #if canImport(Cocoa)
 import Cocoa
 #elseif canImport(UIKit)
@@ -55,7 +49,7 @@ public struct AttributedString {
     }
     
     public init(_ string: String, attributes: [Keys: Any] = [:]) {
-        let attrString = NSAttributedString(string: string, attributes: attributes.asFoundation)
+        let attrString = NSAttributedString(string: string, attributes: attributes.asNS)
         self.init(attrString)
     }
     
@@ -112,7 +106,7 @@ public extension AttributedString {
     }
     
     func attribute<T>(name: Key<T>, at index: Int) -> T? {
-        guard let attr = _backing.immutableValue.attribute(name.asFoundation, at: index, effectiveRange: nil),
+        guard let attr = _backing.immutableValue.attribute(name.asNS, at: index, effectiveRange: nil),
             let typedAttr = attr as? T else {
             return nil
         }
@@ -121,7 +115,7 @@ public extension AttributedString {
     
     func attribute<T>(name: Key<T>, at index: Int, in range: NSRange? = nil) -> (T, longestEffectiveRange: NSRange)? {
         var longestEffectiveRange = NSRange(location: 0, length: 0)
-        guard let attr = _backing.immutableValue.attribute(name.asFoundation, at: index, longestEffectiveRange: &longestEffectiveRange, in: range ?? fullRange),
+        guard let attr = _backing.immutableValue.attribute(name.asNS, at: index, longestEffectiveRange: &longestEffectiveRange, in: range ?? fullRange),
             let typedAttr = attr as? T else {
             return nil
         }
@@ -129,7 +123,7 @@ public extension AttributedString {
     }
     
     func enumerateAttribute<T>(name: Key<T>, in range: NSRange? = nil, options: EnumerationOptions = [], using: (T?, NSRange, inout Bool) -> Void) {
-        _backing.immutableValue.enumerateAttribute(name.asFoundation, in: range ?? fullRange, options: options) { (val, range, pstop) in
+        _backing.immutableValue.enumerateAttribute(name.asNS, in: range ?? fullRange, options: options) { (val, range, pstop) in
             var stop = false
             let typedVal = val as? T
             using(typedVal, range, &stop)
@@ -146,7 +140,7 @@ public extension AttributedString {
     }
     
     mutating func set(attributes: [Keys: Any], in range: NSRange? = nil) {
-        _backing.uniqueMutableValue().setAttributes(attributes.asFoundation, range: range ?? fullRange)
+        _backing.uniqueMutableValue().setAttributes(attributes.asNS, range: range ?? fullRange)
     }
     
     mutating func set<R>(attributes: [Keys: Any], in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
@@ -155,7 +149,7 @@ public extension AttributedString {
     }
     
     mutating func add<T>(attribute: Key<T>, value: T, in range: NSRange? = nil) {
-        _backing.uniqueMutableValue().addAttribute(attribute.asFoundation, value: value, range: range ?? fullRange)
+        _backing.uniqueMutableValue().addAttribute(attribute.asNS, value: value, range: range ?? fullRange)
     }
     
     mutating func add<T, R>(attribute: Key<T>, value: T, in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
@@ -164,7 +158,7 @@ public extension AttributedString {
     }
     
     mutating func add(attributes: [Keys: Any], in range: NSRange? = nil) {
-        _backing.uniqueMutableValue().addAttributes(attributes.asFoundation, range: range ?? fullRange)
+        _backing.uniqueMutableValue().addAttributes(attributes.asNS, range: range ?? fullRange)
     }
     
     mutating func add<R>(attributes: [Keys: Any], in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {
@@ -173,7 +167,7 @@ public extension AttributedString {
     }
     
     mutating func remove(attribute: Keys, in range: NSRange? = nil) {
-        _backing.uniqueMutableValue().removeAttribute(attribute.asFoundation, range: range ?? fullRange)
+        _backing.uniqueMutableValue().removeAttribute(attribute.asNS, range: range ?? fullRange)
     }
     
     mutating func remove<R>(attribute: Keys, in range: R) where R: RangeExpression, R.Bound: FixedWidthInteger {

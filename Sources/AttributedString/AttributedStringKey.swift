@@ -1,10 +1,3 @@
-//
-//  AttributedStringKey.swift
-//  AttributedString
-//
-//  Created by ddddxxx on 2018/10/17.
-//
-
 import Foundation
 
 #if canImport(Cocoa)
