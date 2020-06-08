@@ -21,17 +21,6 @@ extension AttributedString.Keys {
     }
 }
 
-extension AttributedString.Keys: Equatable, Hashable {
-    
-    public static func == (lhs: AttributedString.Keys, rhs: AttributedString.Keys) -> Bool {
-        return lhs.rawValue == rhs.rawValue
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(rawValue)
-    }
-}
-
 public extension AttributedString.Keys {
     
     static let font = AttributedString.Key<Font>(ns: .font)

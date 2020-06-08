@@ -10,7 +10,7 @@ public struct AttributedString {
     
     public typealias EnumerationOptions = NSAttributedString.EnumerationOptions
     
-    public class Keys: RawRepresentable {
+    public class Keys: RawRepresentable, Equatable, Hashable {
         
         public var rawValue: String
         
@@ -280,8 +280,8 @@ extension AttributedString: Equatable, Hashable {
         return lhs._backing.immutableValue == rhs._backing.immutableValue
     }
     
-    public var hashValue: Int {
-        return _backing.immutableValue.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_backing.immutableValue)
     }
 }
 

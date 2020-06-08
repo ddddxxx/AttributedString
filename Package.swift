@@ -5,19 +5,10 @@ import PackageDescription
 let package = Package(
     name: "AttributedString",
     products: [
-        .library(
-            name: "AttributedString",
-            targets: ["AttributedString"]),
-    ],
-    dependencies: [
-        // .package(url: /* package url */, from: "1.0.0"),
+        .library(name: "AttributedString", targets: ["AttributedString"]),
     ],
     targets: [
-        .target(
-            name: "AttributedString",
-            dependencies: []),
-        .testTarget(
-            name: "AttributedStringTests",
-            dependencies: ["AttributedString"]),
+        .target(name: "AttributedString"),
+        .testTarget(name: "AttributedStringTests", dependencies: ["AttributedString"]),
     ]
 )
